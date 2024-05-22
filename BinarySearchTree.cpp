@@ -111,3 +111,186 @@ void Dictionary<T>::INSERTWORD(const T& word) {
     }
 }
 
+template <class T>
+void Dictionary<T>::DELETEWORD(const T& word) {
+    if (this->getNumberOfWords() == 0)
+    {
+        std::cout << "Словарь сейчас пуст!\n";
+        return;
+    }
+    Node* temp = SearchNode(word);
+    if (temp == nullptr) {
+        std::cout << "Не удалось найти это слово, попробуйте снова!\n";
+        return;
+    }
+    Node* tempprev = temp->p_;
+    if ((temp->right_ == nullptr) && (temp->left_ == nullptr)) {
+        if (tempprev->data_ < temp->data_) {
+            tempprev->right_ = nullptr;
+        }
+        if (tempprev->data_ > temp->data_) {
+            tempprev->left_ = nullptr;
+        }
+        delete temp;
+    }
+    else if (((temp->right_ != nullptr) || (temp->left_ != nullptr)) && !((temp->right_ != nullptr) && (temp->left_ != nullptr)))
+    {
+        if (temp->right_ == nullptr) {
+            if (tempprev->data_ < tempprev->data_) {
+                tempprev->left_ = temp->left_;
+                delete temp;
+            }
+            else if (tempprev->data_ > tempprev->data_) {
+                tempprev->right_ = temp->right_;
+                delete temp;
+            }
+        }
+        if (temp->left_ == nullptr) {
+            if (tempprev->data_ < temp->data_) {
+                tempprev->right_ = temp->right_;
+                delete temp;
+            }
+            else if (tempprev->data_ > temp->data_) {
+                tempprev->left_ = temp->right_;
+                delete temp;
+            }
+        }
+    }
+    else if ((temp->right_ != nullptr) && (temp->left_ != nullptr)) {
+        tempprev = temp;
+        temp = temp->right_;
+        while ((temp->right_ != nullptr) && (temp->left_ != nullptr)) {
+            temp = temp->left_;
+        }
+        if (tempprev->right_ != temp) {
+            tempprev->data_ = temp->data_;
+            Node* prev = temp->p_;
+            if (temp->data_ == prev->left_->data_) {
+                prev->left_ = nullptr;
+            }
+            if (temp->data_ == prev->right_->data_) {
+                prev->left_ = nullptr;
+            }
+        }
+        else {
+            tempprev->data_ = temp->data_;
+            tempprev->right_ = nullptr;
+        }
+        delete temp;
+    }
+    else {
+        std::cout << "Не удалось найти это слово, попробуйте снова!\n";
+        return;
+    }
+}
+
+template<class T>
+typename Dictionary<T>::Node* Dictionary<T>::SearchNode(const T& key) const {
+    Node* temp = root_;
+    if (temp == nullptr) {
+        return temp;
+    }
+    while ((temp != nullptr)) {
+        if (temp->data_ == key) {
+            return temp;
+        }
+        else if (temp->data_ > key) {
+            temp = temp->left_;
+        }
+        else if (temp->data_ < key) {
+            temp = temp->right_;
+        }
+    }
+    if (temp == root_) {
+        return temp;
+    }
+    else {
+        temp = nullptr;
+        return temp;
+    }
+}
+
+template<class T>
+void Dictionary<T>::ADDTRANSLATION(const T& word, const T& translation) {
+    Node* temp = SearchNode(word);
+    if (temp == nullptr) {
+        this->INSERTWORD(word);
+    }
+    temp = SearchNode(word);
+    if (temp == nullptr) {
+        return;
+    }
+    temp->translations_.insert(translation);
+}
+
+template<class T>
+void Dictionary<T>::TRANSLATEWORD(const T& word) {
+    if (this->getNumberOfWords() == 0)
+    {
+        std::cout << "Словарь сейчас пуст!\n";
+        return;
+    }
+    Node* temp = SearchNode(word);
+    if (temp == nullptr) {
+        std::cout << "Не удалось найти это слово, попробуйте снова!\n";
+        return;
+    }
+    std::cout << "Слово: " << temp->data_ << "\n";
+    std::cout << "Перевод: ";
+    temp->translations_.print();
+}
+
+template<class T>
+void Dictionary<T>::VIEWALLWORDS() {
+    if (root_ == nullptr) {
+        std::cout << "Словарь сейчас пуст!";
+        return;
+    }
+    std::cout << "Словарь содержит следующие слова:\n\n";
+    int size = 0;
+    iterativeWalk(root_, size);
+    std::cout << "\nОбщее количество слов в словаре: " << size << "\n\n";
+}
+
+template<class T>
+void Dictionary<T>::iterativeWalk(const Dictionary::Node* node, int& size) {
+    if (node != nullptr)
+    {
+        iterativeWalk(node->left_, size);
+        std::cout << node->data_ << "\n";
+        size++;
+        iterativeWalk(node->right_, size);
+    }
+}
+
+template<class T>
+void Dictionary<T>::reloadTheDictionary(const std::string& filename) {
+    std::ofstream stream(filename);
+    Node* node = root_;
+    printInFile(node, stream);
+}
+
+template<class T>
+void Dictionary<T>::printInFile(Node* node, std::ofstream& stream) {
+    if (node != nullptr)
+    {
+        printInFile(node->left_, stream);
+        stream << node->data_ << "\n\n";
+        node->translations_.printFile(stream);
+        stream << "\n";
+        printInFile(node->right_, stream);
+    }
+}
+
+template <class T>
+int Dictionary<T>::getNumberOfWords() const {
+    return getCount(this->root_);
+}
+
+template <class T>
+int Dictionary<T>::getCount(const Node* node) const {
+    if (node == nullptr)
+        return 0;
+    return (1 + getCount(node->left_) +
+        getCount(node->right_));
+}
