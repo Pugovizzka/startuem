@@ -1,11 +1,9 @@
 ﻿#include <iostream>
 #include <fstream>
-#include <windows.h>
-#include "bst.h"
+#include <iostream>
+#include "BinarySearchTree.hpp"
 
 int main() {
-    SetConsoleCP(1251);
-    SetConsoleOutputCP(1251);
     setlocale(LC_ALL, "ru");
     Dictionary<std::string> vocabulary;
     std::string filename = "file.txt";
