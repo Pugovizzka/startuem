@@ -1,6 +1,7 @@
 #include <stdexcept>
 #include <string>
 #include <fstream>
+#include <iostream>
 
 template<class T>
 class List

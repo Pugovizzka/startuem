@@ -1,0 +1,1 @@
+g++ main.cpp BinarySearchTree.hpp wordTranslation.h -o main
